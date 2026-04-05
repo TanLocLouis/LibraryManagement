@@ -57,14 +57,13 @@ public class ReaderDAO {
                         parts[5],
                         parts[6],
                         parts[7],
-                        Boolean.parseBoolean(parts[8])
+                        parts[8]
                 ));
             }
         } catch (IOException e) {
             throw new IllegalStateException("Unable to load readers", e);
         }
     }
-
     public void saveReaders() {
         try {
             Path parent = FILE_PATH.getParent();
@@ -79,10 +78,7 @@ public class ReaderDAO {
                             safe(reader.getDateOfBirth()),
                             safe(reader.getGender()),
                             safe(reader.getAddress()),
-                            safe(reader.getEmail()),
-                            safe(reader.getPhoneNumber()),
-                            safe(reader.getMembershipDate()),
-                            Boolean.toString(reader.isActive())));
+                            safe(reader.getEmail())));
                     writer.newLine();
                 }
             }

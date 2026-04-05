@@ -72,31 +72,5 @@ public class BorrowSlip {
     public void setIsbnList(List<String> isbnList) {
         this.isbnList = isbnList == null ? new ArrayList<>() : new ArrayList<>(isbnList);
     }
-
-    @Override
-    public String toString() {
-        return "BorrowSlip{" +
-                "slipId='" + slipId + '\'' +
-                ", readerId='" + readerId + '\'' +
-                ", isbnList=" + isbnList +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        BorrowSlip that = (BorrowSlip) o;
-        return Objects.equals(slipId, that.slipId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(slipId);
-    }
 }
 

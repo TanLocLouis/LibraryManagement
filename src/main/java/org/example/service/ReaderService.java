@@ -31,7 +31,6 @@ public class ReaderService {
         return reader != null
                 && notBlank(reader.getReaderId())
                 && notBlank(reader.getFullName())
-                && notBlank(reader.getPhoneNumber())
                 && notBlank(reader.getEmail());
     }
 

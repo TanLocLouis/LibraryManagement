@@ -5,29 +5,33 @@ import java.util.Objects;
 public class Reader {
     private String readerId;
     private String fullName;
+    private String IDCardNumber;
     private String dateOfBirth;
     private String gender;
-    private String address;
     private String email;
-    private String phoneNumber;
-    private String membershipDate;
-    private boolean active;
+    private String address;
+    private String createDate;
+    private String expireDate;
 
+    private final int EXPIRE_MONTHS = 48;
+
+    //    Constructor
     public Reader() {
     }
 
-    public Reader(String readerId, String fullName, String dateOfBirth, String gender, String address, String email, String phoneNumber, String membershipDate, boolean active) {
+    public Reader(String readerId, String fullName, String IDCardNumber, String dateOfBirth, String gender, String email, String address, String createDate, String expireDate) {
         this.readerId = readerId;
         this.fullName = fullName;
         this.dateOfBirth = dateOfBirth;
+        this.IDCardNumber = IDCardNumber;
         this.gender = gender;
-        this.address = address;
         this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.membershipDate = membershipDate;
-        this.active = active;
+        this.address = address;
+        this.createDate = createDate;
+        this.expireDate = expireDate;
     }
 
+    // Getters and Setters
     public String getReaderId() {
         return readerId;
     }
@@ -52,20 +56,20 @@ public class Reader {
         this.dateOfBirth = dateOfBirth;
     }
 
+    public String getIDCardNumber() {
+        return IDCardNumber;
+    }
+
+    public void setIDCardNumber(String IDCardNumber) {
+        this.IDCardNumber = IDCardNumber;
+    }
+
     public String getGender() {
         return gender;
     }
 
     public void setGender(String gender) {
         this.gender = gender;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public String getEmail() {
@@ -76,54 +80,28 @@ public class Reader {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getAddress() {
+        return address;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    public String getMembershipDate() {
-        return membershipDate;
+    public String getCreateDate() {
+        return createDate;
     }
 
-    public void setMembershipDate(String membershipDate) {
-        this.membershipDate = membershipDate;
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
     }
 
-    public boolean isActive() {
-        return active;
+    public String getExpireDate() {
+        return expireDate;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    @Override
-    public String toString() {
-        return "Reader{" +
-                "readerId='" + readerId + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", active=" + active +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reader reader = (Reader) o;
-        return Objects.equals(readerId, reader.readerId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(readerId);
+    public void setExpireDate(String expireDate) {
+        this.expireDate = expireDate;
     }
 }
 

@@ -6,23 +6,23 @@ public class Book {
     private String isbn;
     private String title;
     private String author;
-    private String category;
     private String publisher;
     private int publishYear;
-    private int totalCopies;
+    private String category;
+    private int price;
     private int availableCopies;
 
     public Book() {
     }
 
-    public Book(String isbn, String title, String author, String category, String publisher, int publishYear, int totalCopies, int availableCopies) {
+    public Book(String isbn, String title, String author, String category, String publisher, int publishYear, int price, int availableCopies) {
         this.isbn = isbn;
         this.title = title;
         this.author = author;
         this.category = category;
         this.publisher = publisher;
         this.publishYear = publishYear;
-        this.totalCopies = totalCopies;
+        this.price = price;
         this.availableCopies = availableCopies;
     }
 
@@ -50,14 +50,6 @@ public class Book {
         this.author = author;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
     public String getPublisher() {
         return publisher;
     }
@@ -74,12 +66,20 @@ public class Book {
         this.publishYear = publishYear;
     }
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     public int getTotalCopies() {
-        return totalCopies;
+        return price;
     }
 
     public void setTotalCopies(int totalCopies) {
-        this.totalCopies = totalCopies;
+        this.price = totalCopies;
     }
 
     public int getAvailableCopies() {
@@ -88,32 +88,6 @@ public class Book {
 
     public void setAvailableCopies(int availableCopies) {
         this.availableCopies = availableCopies;
-    }
-
-    @Override
-    public String toString() {
-        return "Book{" +
-                "isbn='" + isbn + '\'' +
-                ", title='" + title + '\'' +
-                ", availableCopies=" + availableCopies +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Book book = (Book) o;
-        return Objects.equals(isbn, book.isbn);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(isbn);
     }
 }
 
