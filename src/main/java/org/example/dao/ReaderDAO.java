@@ -19,20 +19,7 @@ public class ReaderDAO {
         loadReaders();
     }
 
-    public ArrayList<Reader> getReaders() {
-        return readers;
-    }
-
-    public Optional<Reader> findById(String readerId) {
-        return readers.stream()
-                .filter(reader -> reader.getReaderId() != null && reader.getReaderId().equals(readerId))
-                .findFirst();
-    }
-
-    public void addReader(Reader reader) {
-        readers.add(reader);
-    }
-
+    // Load and Save
     public void loadReaders() {
         readers.clear();
         if (!Files.exists(FILE_PATH)) {
@@ -64,6 +51,7 @@ public class ReaderDAO {
             throw new IllegalStateException("Unable to load readers", e);
         }
     }
+
     public void saveReaders() {
         try {
             Path parent = FILE_PATH.getParent();
@@ -89,6 +77,20 @@ public class ReaderDAO {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    // Getters and Setters
+    public ArrayList<Reader> getReaders() {
+        return readers;
+    }
+    public void addReader(Reader reader) {
+        readers.add(reader);
+    }
+
+    public Optional<Reader> findById(String readerId) {
+        return readers.stream()
+                .filter(reader -> reader.getReaderId() != null && reader.getReaderId().equals(readerId))
+                .findFirst();
     }
 }
 

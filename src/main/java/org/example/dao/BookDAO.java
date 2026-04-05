@@ -19,20 +19,7 @@ public class BookDAO {
         loadBooks();
     }
 
-    public ArrayList<Book> getBooks() {
-        return books;
-    }
-
-    public Optional<Book> findByIsbn(String isbn) {
-        return books.stream()
-                .filter(book -> book.getIsbn() != null && book.getIsbn().equals(isbn))
-                .findFirst();
-    }
-
-    public void addBook(Book book) {
-        books.add(book);
-    }
-
+    // Load and Save
     public void loadBooks() {
         books.clear();
         if (!Files.exists(FILE_PATH)) {
@@ -89,6 +76,19 @@ public class BookDAO {
         }
     }
 
+    private String safe(String value) {
+        return value == null ? "" : value;
+    }
+
+    // Getters and Setters
+    public void addBook(Book book) {
+        books.add(book);
+    }
+
+    public ArrayList<Book> getBooks() {
+        return books;
+    }
+
     private int parseInt(String value) {
         try {
             return Integer.parseInt(value.trim());
@@ -97,8 +97,10 @@ public class BookDAO {
         }
     }
 
-    private String safe(String value) {
-        return value == null ? "" : value;
+    public Optional<Book> findByIsbn(String isbn) {
+        return books.stream()
+                .filter(book -> book.getIsbn() != null && book.getIsbn().equals(isbn))
+                .findFirst();
     }
 }
 

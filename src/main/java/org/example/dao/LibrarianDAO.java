@@ -29,10 +29,7 @@ public class LibrarianDAO {
                 .findFirst();
     }
 
-    public void addLibrarian(Librarian librarian) {
-        librarians.add(librarian);
-    }
-
+    // Load and Save
     public void loadLibrarians() {
         librarians.clear();
         if (!Files.exists(FILE_PATH)) {
@@ -76,6 +73,11 @@ public class LibrarianDAO {
 
     private String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    // Getters and Setters
+    public void addLibrarian(Librarian librarian) {
+        librarians.add(librarian);
     }
 }
 

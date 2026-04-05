@@ -23,20 +23,7 @@ public class BorrowDAO {
         loadBorrowSlips();
     }
 
-    public ArrayList<BorrowSlip> getBorrowSlips() {
-        return borrowSlips;
-    }
-
-    public Optional<BorrowSlip> findById(String slipId) {
-        return borrowSlips.stream()
-                .filter(slip -> slip.getSlipId() != null && slip.getSlipId().equals(slipId))
-                .findFirst();
-    }
-
-    public void addBorrowSlip(BorrowSlip borrowSlip) {
-        borrowSlips.add(borrowSlip);
-    }
-
+    // Load and save
     public void loadBorrowSlips() {
         borrowSlips.clear();
         if (!Files.exists(FILE_PATH)) {
@@ -98,5 +85,21 @@ public class BorrowDAO {
     private String safe(String value) {
         return value == null ? "" : value;
     }
+
+    // Getter and Setter
+    public ArrayList<BorrowSlip> getBorrowSlips() {
+        return borrowSlips;
+    }
+
+    public Optional<BorrowSlip> findById(String slipId) {
+        return borrowSlips.stream()
+                .filter(slip -> slip.getSlipId() != null && slip.getSlipId().equals(slipId))
+                .findFirst();
+    }
+
+    public void addBorrowSlip(BorrowSlip borrowSlip) {
+        borrowSlips.add(borrowSlip);
+    }
+
 }
 
