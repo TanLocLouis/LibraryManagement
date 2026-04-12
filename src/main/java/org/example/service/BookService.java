@@ -52,10 +52,17 @@ public class BookService {
     }
 
     public void saveBooks() {
-        if (bookDAO.getBooks().isEmpty()) {
-            return;
-        }
         bookDAO.saveBooks();
     }
-}
 
+    public boolean deleteBook(String isbn) {
+        if (isbn == null || isbn.isBlank()) {
+            throw new IllegalArgumentException("ISBN cannot be blank");
+        }
+        boolean deleted = bookDAO.deleteByIsbn(isbn);
+        if (deleted) {
+            saveBooks();
+        }
+        return deleted;
+    }
+}

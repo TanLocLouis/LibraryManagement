@@ -102,5 +102,12 @@ public class BookDAO {
                 .filter(book -> book.getIsbn() != null && book.getIsbn().equals(isbn))
                 .findFirst();
     }
-}
 
+    public boolean deleteByIsbn(String isbn) {
+        if (isbn == null) {
+            return false;
+        }
+        String normalized = isbn.trim();
+        return books.removeIf(book -> normalized.equals(book.getIsbn()));
+    }
+}

@@ -32,6 +32,7 @@ public class BookPanel extends JPanel {
         contentPanel.add(editBookButton);
 
         JButton deleteBookButton = new JButton("Delete Book");
+        deleteBookButton.addActionListener(e -> deleteSelectedBook());
         contentPanel.add(deleteBookButton);
 
         // Search panel
@@ -134,5 +135,24 @@ public class BookPanel extends JPanel {
                     book.getAvailableCopies()
             };
             tableModel.addRow(row);}
+    }
+
+    private void deleteSelectedBook() {
+        int selectedRow = bookTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a book to delete.", "No Selection", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String isbn = (String) tableModel.getValueAt(selectedRow, 0);
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this book?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            boolean deleted = bookService.deleteBook(isbn);
+            if (deleted) {
+                loadBookToTable();
+                JOptionPane.showMessageDialog(this, "Book deleted successfully!", "Deleted", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Book not found.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 }
