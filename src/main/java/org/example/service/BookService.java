@@ -79,4 +79,11 @@ public class BookService {
         }
         return updated;
     }
+
+    public List<Book> searchByIsbn(String isbn) {
+        if (isbn == null) {
+            return List.of();
+        }
+        return bookDAO.findByIsbn(isbn.trim()).map(List::of).orElse(List.of());
+    }
 }

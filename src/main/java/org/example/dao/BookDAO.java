@@ -98,8 +98,12 @@ public class BookDAO {
     }
 
     public Optional<Book> findByIsbn(String isbn) {
+        if (isbn == null) {
+            return Optional.empty();
+        }
+        String normalized = isbn.trim();
         return books.stream()
-                .filter(book -> book.getIsbn() != null && book.getIsbn().equals(isbn))
+                .filter(book -> book.getIsbn() != null && book.getIsbn().trim().equals(normalized))
                 .findFirst();
     }
 

@@ -39,18 +39,21 @@ public class BookPanel extends JPanel {
         // Search panel
         JPanel searchPanel = new JPanel();
         JTextField isbnSearchField = new JTextField(12);
-        JButton isbnSearchButton = new JButton("Find by ISBN");
-        searchPanel.add(new JLabel("ISBN:"));
+        JButton isbnSearchButton = new JButton("Find by Title");
+        isbnSearchButton.addActionListener(e -> searchByIsbn(isbnSearchField.getText()));
+        searchPanel.add(new JLabel("Title:"));
         searchPanel.add(isbnSearchField);
         searchPanel.add(isbnSearchButton);
 
         JTextField nameSearchField = new JTextField(12);
         JButton nameSearchButton = new JButton("Find by Name");
+        nameSearchButton.addActionListener(e -> searchByTitle(nameSearchField.getText()));
         searchPanel.add(new JLabel("Book Name:"));
         searchPanel.add(nameSearchField);
         searchPanel.add(nameSearchButton);
 
         JButton showAllButton = new JButton("Show All");
+        showAllButton.addActionListener(e -> loadBookToTable());
         searchPanel.add(showAllButton);
 
         // Table to show books
@@ -223,6 +226,30 @@ public class BookPanel extends JPanel {
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to update book.", "Error", JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    private void searchByIsbn(String isbn) {
+        updateTableWithList(bookService.searchByIsbn(isbn));
+    }
+
+    private void searchByTitle(String title) {
+        updateTableWithList(bookService.searchByTitle(title));
+    }
+
+    private void updateTableWithList(java.util.List<Book> books) {
+        tableModel.setRowCount(0);
+        for (Book book : books) {
+            Object[] row = {
+                    book.getIsbn(),
+                    book.getTitle(),
+                    book.getAuthor(),
+                    book.getPublisher(),
+                    book.getPublishYear(),
+                    book.getCategory(),
+                    book.getAvailableCopies()
+            };
+            tableModel.addRow(row);
         }
     }
 }
