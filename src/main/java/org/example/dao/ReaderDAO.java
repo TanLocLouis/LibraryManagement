@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class ReaderDAO {
@@ -106,6 +107,30 @@ public class ReaderDAO {
         return readers.stream()
                 .filter(reader -> reader.getReaderId() != null && reader.getReaderId().equals(readerId))
                 .findFirst();
+    }
+
+    public List<Reader> findByName(String name) {
+        List<Reader> result = new ArrayList<>();
+        if (name == null) return result;
+        String lower = name.trim().toLowerCase();
+        for (Reader r : readers) {
+            if (r.getFullName() != null && r.getFullName().toLowerCase().contains(lower)) {
+                result.add(r);
+            }
+        }
+        return result;
+    }
+
+    public List<Reader> findByIDCardNumber(String idCardNumber) {
+        List<Reader> result = new ArrayList<>();
+        if (idCardNumber == null) return result;
+        String trimmed = idCardNumber.trim();
+        for (Reader r : readers) {
+            if (r.getIDCardNumber() != null && r.getIDCardNumber().equals(trimmed)) {
+                result.add(r);
+            }
+        }
+        return result;
     }
 
     private String safe(String value) {

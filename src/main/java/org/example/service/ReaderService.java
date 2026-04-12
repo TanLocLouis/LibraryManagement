@@ -84,5 +84,12 @@ public class ReaderService {
 
         return updated;
     }
-}
 
+    public List<Reader> findReadersByName(String name) {
+        return readerDAO.findByName(name);
+    }
+
+    public List<Reader> findReadersByIDCard(String idCardNumber) {
+        return readerDAO.findByIDCardNumber(idCardNumber);
+    }
+}

@@ -40,6 +40,26 @@ public class ReaderPanel extends JPanel {
         editReaderButton.addActionListener(e -> showEditReaderDialog());
         contentPanel.add(editReaderButton);
 
+        // Search panel
+        JPanel searchPanel = new JPanel();
+        JTextField nameSearchField = new JTextField(12);
+        JButton nameSearchButton = new JButton("Find by Name");
+        nameSearchButton.addActionListener(e -> searchByName(nameSearchField.getText()));
+        searchPanel.add(new JLabel("Name:"));
+        searchPanel.add(nameSearchField);
+        searchPanel.add(nameSearchButton);
+
+        JTextField idCardSearchField = new JTextField(12);
+        JButton idCardSearchButton = new JButton("Find by ID Card");
+        idCardSearchButton.addActionListener(e -> searchByIDCard(idCardSearchField.getText()));
+        searchPanel.add(new JLabel("ID Card:"));
+        searchPanel.add(idCardSearchField);
+        searchPanel.add(idCardSearchButton);
+
+        JButton showAllButton = new JButton("Show All");
+        showAllButton.addActionListener(e -> loadReadersToTable());
+        searchPanel.add(showAllButton);
+
         // Table to show readers
         String[] columns = {"ID", "Full Name", "ID Card", "DOB", "Gender", "Email", "Address", "Create Date", "Expire Date"};
         tableModel = new DefaultTableModel(columns, 0) {
@@ -54,7 +74,8 @@ public class ReaderPanel extends JPanel {
 
         setLayout(new BorderLayout());
         add(contentPanel, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
+        add(searchPanel, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.SOUTH);
     }
 
     private void loadReadersToTable() {
@@ -190,6 +211,33 @@ public class ReaderPanel extends JPanel {
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to update reader.", "Error", JOptionPane.ERROR_MESSAGE);
             }
+        }
+    }
+
+    private void searchByName(String name) {
+        List<Reader> results = readerService.findReadersByName(name);
+        updateTableWithList(results);
+    }
+
+    private void searchByIDCard(String idCard) {
+        List<Reader> results = readerService.findReadersByIDCard(idCard);
+        updateTableWithList(results);
+    }
+
+    private void updateTableWithList(List<Reader> readers) {
+        tableModel.setRowCount(0);
+        for (Reader r : readers) {
+            tableModel.addRow(new Object[] {
+                r.getReaderId(),
+                r.getFullName(),
+                r.getIDCardNumber(),
+                r.getDateOfBirth(),
+                r.getGender(),
+                r.getEmail(),
+                r.getAddress(),
+                r.getCreateDate(),
+                r.getExpireDate()
+            });
         }
     }
 }
