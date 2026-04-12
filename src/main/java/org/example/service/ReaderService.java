@@ -69,5 +69,20 @@ public class ReaderService {
         }
         readerDAO.deleteReader(readerId);
     }
+
+    public boolean updateReader(String readerId, Reader updatedReader) {
+        if (readerId == null || readerId.isBlank()) {
+            throw new IllegalArgumentException("Reader ID cannot be blank");
+        }
+        if (!validate(updatedReader)) {
+            throw new IllegalArgumentException("Invalid reader data");
+        }
+        boolean updated = readerDAO.updateReader(readerId, updatedReader);
+        if (!updated) {
+            throw new IllegalStateException("Reader with ID " + readerId + " not found");
+        }
+
+        return updated;
+    }
 }
 

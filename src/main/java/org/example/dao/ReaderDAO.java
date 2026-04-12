@@ -91,6 +91,16 @@ public class ReaderDAO {
         saveReaders();
     }
 
+    public boolean updateReader(String readerId, Reader updatedReader) {
+        for (int i = 0; i < readers.size(); i++) {
+            if (readerId.equals(readers.get(i).getReaderId())) {
+                readers.set(i, updatedReader);
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Utils
     public Optional<Reader> findById(String readerId) {
         return readers.stream()
@@ -102,4 +112,3 @@ public class ReaderDAO {
         return value == null ? "" : value;
     }
 }
-
