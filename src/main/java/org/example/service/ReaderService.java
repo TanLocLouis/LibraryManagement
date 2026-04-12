@@ -3,6 +3,7 @@ package org.example.service;
 import org.example.dao.ReaderDAO;
 import org.example.model.Reader;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -40,6 +41,26 @@ public class ReaderService {
 
     private boolean notBlank(String value) {
         return value != null && !value.isBlank();
+    }
+
+    public ArrayList<Reader> getReaderList() {
+        return readerDAO.getReaders();
+    }
+
+    //
+    public void addReader(Reader reader) {
+        if (validate(reader)) {
+            readerDAO.addReader(reader);
+        } else {
+            throw new IllegalArgumentException("Invalid reader data");
+        }
+    }
+
+    public void saveReaders() {
+        if (readerDAO.getReaders().isEmpty()) {
+            throw new IllegalStateException("No readers to save");
+        }
+        readerDAO.saveReaders();
     }
 }
 

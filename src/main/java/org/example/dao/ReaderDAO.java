@@ -64,19 +64,18 @@ public class ReaderDAO {
                             safe(reader.getReaderId()),
                             safe(reader.getFullName()),
                             safe(reader.getDateOfBirth()),
+                            safe(reader.getIDCardNumber()),
                             safe(reader.getGender()),
+                            safe(reader.getEmail()),
                             safe(reader.getAddress()),
-                            safe(reader.getEmail())));
+                            safe(reader.getCreateDate()),
+                            safe(reader.getExpireDate())));
                     writer.newLine();
                 }
             }
         } catch (IOException e) {
             throw new IllegalStateException("Unable to save readers", e);
         }
-    }
-
-    private String safe(String value) {
-        return value == null ? "" : value;
     }
 
     // Getters and Setters
@@ -87,10 +86,15 @@ public class ReaderDAO {
         readers.add(reader);
     }
 
+    // Utils
     public Optional<Reader> findById(String readerId) {
         return readers.stream()
                 .filter(reader -> reader.getReaderId() != null && reader.getReaderId().equals(readerId))
                 .findFirst();
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
     }
 }
 

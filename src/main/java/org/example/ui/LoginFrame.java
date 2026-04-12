@@ -35,8 +35,14 @@ public class LoginFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
         add(buildForm(), BorderLayout.CENTER);
-        add(buildLoginButton(), BorderLayout.SOUTH);
+
+        // Add both Login and Register buttons at the bottom
+        javax.swing.JPanel buttonPanel = new javax.swing.JPanel();
+        buttonPanel.add(buildLoginButton());
+        buttonPanel.add(buildRegisterButton());
+        add(buttonPanel, BorderLayout.SOUTH);
         pack();
+
         setLocationRelativeTo(null);
     }
 
@@ -71,6 +77,16 @@ public class LoginFrame extends JFrame {
         return loginButton;
     }
 
+    private JButton buildRegisterButton() {
+        JButton registerButton = new JButton("Register");
+        registerButton.addActionListener(e -> {
+            RegisterFrame registerFrame = new RegisterFrame();
+            registerFrame.setVisible(true);
+            dispose();
+        });
+        return registerButton;
+    }
+
     private void handleLogin() {
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
@@ -83,4 +99,3 @@ public class LoginFrame extends JFrame {
         }
     }
 }
-
