@@ -110,4 +110,18 @@ public class BookDAO {
         String normalized = isbn.trim();
         return books.removeIf(book -> normalized.equals(book.getIsbn()));
     }
+
+    public boolean updateByIsbn(String isbn, Book updatedBook) {
+        if (isbn == null || updatedBook == null) {
+            return false;
+        }
+        for (int i = 0; i < books.size(); i++) {
+            Book current = books.get(i);
+            if (current.getIsbn() != null && current.getIsbn().equals(isbn)) {
+                books.set(i, updatedBook);
+                return true;
+            }
+        }
+        return false;
+    }
 }

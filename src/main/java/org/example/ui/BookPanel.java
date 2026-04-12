@@ -29,6 +29,7 @@ public class BookPanel extends JPanel {
         contentPanel.add(addBookButton);
 
         JButton editBookButton = new JButton("Edit Book");
+        editBookButton.addActionListener(e -> showEditBookDialog());
         contentPanel.add(editBookButton);
 
         JButton deleteBookButton = new JButton("Delete Book");
@@ -118,6 +119,7 @@ public class BookPanel extends JPanel {
 
             bookService.addBook(newBook);
             bookService.saveBooks();
+            loadBookToTable();
             JOptionPane.showMessageDialog(this, "Book added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
         }
     }
@@ -152,6 +154,74 @@ public class BookPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Book deleted successfully!", "Deleted", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "Book not found.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void showEditBookDialog() {
+        int selectedRow = bookTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a book to edit.", "No Selection", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String isbn = (String) tableModel.getValueAt(selectedRow, 0);
+        Book book = bookService.getBookDAO().findByIsbn(isbn).orElse(null);
+        if (book == null) {
+            JOptionPane.showMessageDialog(this, "Selected book not found.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JTextField isbnField = new JTextField(book.getIsbn(), 15);
+        isbnField.setEditable(false);
+        JTextField titleField = new JTextField(book.getTitle(), 15);
+        JTextField authorField = new JTextField(book.getAuthor(), 15);
+        JTextField categoryField = new JTextField(book.getCategory(), 15);
+        JTextField publisherField = new JTextField(book.getPublisher(), 15);
+        JTextField publishYearField = new JTextField(String.valueOf(book.getPublishYear()), 15);
+        JTextField priceField = new JTextField(String.valueOf(book.getTotalCopies()), 15);
+        JTextField availableCopiesField = new JTextField(String.valueOf(book.getAvailableCopies()), 15);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.add(new JLabel("ISBN:"));
+        panel.add(isbnField);
+        panel.add(new JLabel("Title:"));
+        panel.add(titleField);
+        panel.add(new JLabel("Author:"));
+        panel.add(authorField);
+        panel.add(new JLabel("Category:"));
+        panel.add(categoryField);
+        panel.add(new JLabel("Publisher:"));
+        panel.add(publisherField);
+        panel.add(new JLabel("Publish Year:"));
+        panel.add(publishYearField);
+        panel.add(new JLabel("Price:"));
+        panel.add(priceField);
+        panel.add(new JLabel("Available Copies:"));
+        panel.add(availableCopiesField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Edit Book", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            String title = titleField.getText().trim();
+            String author = authorField.getText().trim();
+            String category = categoryField.getText().trim();
+            String publisher = publisherField.getText().trim();
+            int publishYear = parseInt(publishYearField.getText().trim());
+            int price = parseInt(priceField.getText().trim());
+            int quantity = parseInt(availableCopiesField.getText().trim());
+
+            Book updatedBook = new Book(isbn, title, author, category, publisher, publishYear, price, quantity);
+            if (!bookService.validate(updatedBook)) {
+                JOptionPane.showMessageDialog(this, "Invalid book data. Please check your input.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            boolean updated = bookService.updateBook(isbn, updatedBook);
+            if (updated) {
+                loadBookToTable();
+                JOptionPane.showMessageDialog(this, "Book updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed to update book.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

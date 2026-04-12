@@ -65,4 +65,18 @@ public class BookService {
         }
         return deleted;
     }
+
+    public boolean updateBook(String isbn, Book updatedBook) {
+        if (isbn == null || isbn.isBlank()) {
+            throw new IllegalArgumentException("ISBN cannot be blank");
+        }
+        if (!validate(updatedBook)) {
+            throw new IllegalArgumentException("Invalid book data");
+        }
+        boolean updated = bookDAO.updateByIsbn(isbn, updatedBook);
+        if (updated) {
+            saveBooks();
+        }
+        return updated;
+    }
 }
