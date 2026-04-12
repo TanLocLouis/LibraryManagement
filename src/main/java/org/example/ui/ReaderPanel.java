@@ -125,11 +125,13 @@ public class ReaderPanel extends JPanel {
             String address = addressField.getText().trim();
             String createDate = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
             String expireDate = LocalDate.now().plusMonths(48).format(DateTimeFormatter.ISO_DATE);
+
             Reader reader = new Reader(readerId, fullName, idCard, dob, gender, email, address, createDate, expireDate);
             if (!readerService.validate(reader)) {
                 JOptionPane.showMessageDialog(this, "Full Name, Email, and Reader ID are required.", "Validation Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+
             readerService.getReaderDAO().addReader(reader);
             readerService.getReaderDAO().saveReaders();
             loadReadersToTable();

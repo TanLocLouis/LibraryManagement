@@ -41,5 +41,21 @@ public class BookService {
     private boolean notBlank(String value) {
         return value != null && !value.isBlank();
     }
+
+    //
+    public void addBook(Book book) {
+        if (validate(book)) {
+            bookDAO.addBook(book);
+        } else {
+            throw new IllegalArgumentException("Invalid book data");
+        }
+    }
+
+    public void saveBooks() {
+        if (bookDAO.getBooks().isEmpty()) {
+            return;
+        }
+        bookDAO.saveBooks();
+    }
 }
 
