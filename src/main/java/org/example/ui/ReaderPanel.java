@@ -30,6 +30,11 @@ public class ReaderPanel extends JPanel {
         addReaderButton.addActionListener(e -> showAddReaderDialog());
         contentPanel.add(addReaderButton);
 
+        // Delete reader button
+        JButton deleteReaderButton = new JButton("Delete Reader");
+        deleteReaderButton.addActionListener(e -> deleteSelectedReader());
+        contentPanel.add(deleteReaderButton);
+
         // Table to show readers
         String[] columns = {"ID", "Full Name", "ID Card", "DOB", "Gender", "Email", "Address", "Create Date", "Expire Date"};
         tableModel = new DefaultTableModel(columns, 0) {
@@ -103,6 +108,23 @@ public class ReaderPanel extends JPanel {
             readerService.getReaderDAO().saveReaders();
             loadReadersToTable();
             JOptionPane.showMessageDialog(this, "Reader added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void deleteSelectedReader() {
+        int selectedRow = readerTable.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a reader to delete.", "No Selection", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String readerId = (String) tableModel.getValueAt(selectedRow, 0);
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this reader?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            readerService.deleteReader(readerId);
+
+            // Refresh the table after deletion
+            loadReadersToTable();
+            JOptionPane.showMessageDialog(this, "Reader deleted successfully!", "Deleted", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }

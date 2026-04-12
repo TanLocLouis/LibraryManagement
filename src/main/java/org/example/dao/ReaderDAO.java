@@ -86,6 +86,11 @@ public class ReaderDAO {
         readers.add(reader);
     }
 
+    public void deleteReader(String readerId) {
+        readers.removeIf(reader -> reader.getReaderId() != null && reader.getReaderId().equals(readerId));
+        saveReaders();
+    }
+
     // Utils
     public Optional<Reader> findById(String readerId) {
         return readers.stream()

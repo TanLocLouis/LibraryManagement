@@ -62,5 +62,12 @@ public class ReaderService {
         }
         readerDAO.saveReaders();
     }
+
+    public void deleteReader(String readerId) {
+        if (readerId == null || readerId.isBlank()) {
+            throw new IllegalArgumentException("Reader ID cannot be blank");
+        }
+        readerDAO.deleteReader(readerId);
+    }
 }
 
