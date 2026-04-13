@@ -39,9 +39,9 @@ public class BookPanel extends JPanel {
         // Search panel
         JPanel searchPanel = new JPanel();
         JTextField isbnSearchField = new JTextField(12);
-        JButton isbnSearchButton = new JButton("Find by Title");
+        JButton isbnSearchButton = new JButton("Find by ISBN");
         isbnSearchButton.addActionListener(e -> searchByIsbn(isbnSearchField.getText()));
-        searchPanel.add(new JLabel("Title:"));
+        searchPanel.add(new JLabel("ISBN:"));
         searchPanel.add(isbnSearchField);
         searchPanel.add(isbnSearchButton);
 

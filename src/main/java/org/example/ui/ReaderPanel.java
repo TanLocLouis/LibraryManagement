@@ -30,15 +30,15 @@ public class ReaderPanel extends JPanel {
         addReaderButton.addActionListener(e -> showAddReaderDialog());
         contentPanel.add(addReaderButton);
 
-        // Delete reader button
-        JButton deleteReaderButton = new JButton("Delete Reader");
-        deleteReaderButton.addActionListener(e -> deleteSelectedReader());
-        contentPanel.add(deleteReaderButton);
-
         // Edit reader button
         JButton editReaderButton = new JButton("Edit Reader");
         editReaderButton.addActionListener(e -> showEditReaderDialog());
         contentPanel.add(editReaderButton);
+
+        // Delete reader button
+        JButton deleteReaderButton = new JButton("Delete Reader");
+        deleteReaderButton.addActionListener(e -> deleteSelectedReader());
+        contentPanel.add(deleteReaderButton);
 
         // Search panel
         JPanel searchPanel = new JPanel();
