@@ -86,4 +86,12 @@ public class BookService {
         }
         return bookDAO.findByIsbn(isbn.trim()).map(List::of).orElse(List.of());
     }
+
+    public int countBooks() {
+        return bookDAO.countBooks();
+    }
+
+    public int countBooksByCategory(String category) {
+        return bookDAO.countBooksByCategory(category);
+    }
 }

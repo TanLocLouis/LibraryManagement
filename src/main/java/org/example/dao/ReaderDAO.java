@@ -136,4 +136,21 @@ public class ReaderDAO {
     private String safe(String value) {
         return value == null ? "" : value;
     }
+
+    public int countReaders() {
+        return readers.size();
+    }
+
+    public int countReadersByGender(String gender) {
+        if (gender == null) return 0;
+        String lower = gender.trim().toLowerCase();
+        int count = 0;
+        for (Reader r : readers) {
+            if (r.getGender() != null && r.getGender().trim().toLowerCase().equals(lower)) {
+                count++;
+            }
+        }
+
+        return count;
+    }
 }

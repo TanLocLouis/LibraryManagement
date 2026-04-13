@@ -92,4 +92,12 @@ public class ReaderService {
     public List<Reader> findReadersByIDCard(String idCardNumber) {
         return readerDAO.findByIDCardNumber(idCardNumber);
     }
+
+    public int countReaders() {
+        return readerDAO.getReaders().size();
+    }
+
+    public int countReadersByName(String gender) {
+        return readerDAO.countReadersByGender(gender);
+    }
 }

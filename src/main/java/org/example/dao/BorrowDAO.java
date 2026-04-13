@@ -101,5 +101,22 @@ public class BorrowDAO {
         borrowSlips.add(borrowSlip);
     }
 
+    public int countBorrowSlips() {
+        return borrowSlips.size();
+    }
+
+    public int countOverdueBorrowSlips() {
+        return (int) borrowSlips.stream()
+                .filter(slip -> slip.getReturnDate() == null || slip.getReturnDate().isBlank())
+                .filter(slip -> {
+                    try {
+                        return slip.getDueDate() != null && !slip.getDueDate().isBlank() &&
+                                java.time.LocalDate.parse(slip.getDueDate()).isBefore(java.time.LocalDate.now());
+                    } catch (Exception e) {
+                        return false;
+                    }
+                })
+                .count();
+    }
 }
 

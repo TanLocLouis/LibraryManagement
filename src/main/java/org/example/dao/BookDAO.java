@@ -128,4 +128,19 @@ public class BookDAO {
         }
         return false;
     }
+
+    public int countBooks() {
+        return books.size();
+    }
+
+    public int countBooksByCategory(String category) {
+        if (category == null) {
+            return 0;
+        }
+        String normalized = category.trim().toLowerCase();
+        return (int) books.stream()
+                .filter(book -> book.getCategory() != null
+                        && book.getCategory().toLowerCase().equals(normalized))
+                .count();
+    }
 }

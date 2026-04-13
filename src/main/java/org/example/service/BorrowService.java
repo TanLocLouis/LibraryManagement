@@ -166,4 +166,12 @@ public class BorrowService {
         }
         return counts;
     }
+
+    public int countBorrowSlips() {
+        return borrowDAO.countBorrowSlips();
+    }
+
+    public int countOverdueBorrowSlips() {
+        return borrowDAO.countOverdueBorrowSlips();
+    }
 }
