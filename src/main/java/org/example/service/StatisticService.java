@@ -31,7 +31,11 @@ public class StatisticService {
     }
 
     public int countBorrowedBooks() {
-        return borrowService.countBorrowSlips();
+        return borrowService.getActiveBorrowSlips().stream()
+                .map(BorrowSlip::getIsbnList)
+                .filter(isbnList -> isbnList != null)
+                .mapToInt(List::size)
+                .sum();
     }
 
     public int countTotalBooksInLibrary() {

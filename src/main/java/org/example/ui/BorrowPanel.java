@@ -21,7 +21,10 @@ import java.awt.GridLayout;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class BorrowPanel extends JPanel {
     private final BorrowService borrowService = new BorrowService();
@@ -94,8 +97,8 @@ public class BorrowPanel extends JPanel {
         readerIdField.setEditable(false);
         JTextField borrowDateField = new JTextField(LocalDate.now().toString(), 15);
         JTextField dueDateField = new JTextField(LocalDate.now().plusDays(14).toString(), 15);
-        JTextField isbnListField = new JTextField(20);
-        isbnListField.setEditable(false);
+        JTextField selectedIsbnsField = new JTextField(20);
+        selectedIsbnsField.setEditable(false);
 
         DefaultTableModel readerModel = new DefaultTableModel(new String[] {"Reader ID", "Full Name", "ID Card"}, 0) {
             @Override
@@ -114,8 +117,18 @@ public class BorrowPanel extends JPanel {
             }
         };
         JTable bookTable = new JTable(bookModel);
-        bookTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        bookTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         loadBooksToTable(bookModel, bookService.getBookDAO().getBooks());
+
+        DefaultTableModel selectedBookModel = new DefaultTableModel(new String[] {"ISBN", "Title"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        JTable selectedBookTable = new JTable(selectedBookModel);
+        selectedBookTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        Map<String, String> selectedBooks = new LinkedHashMap<>();
 
         readerTable.getSelectionModel().addListSelectionListener(event -> {
             if (event.getValueIsAdjusting()) {
@@ -127,16 +140,47 @@ public class BorrowPanel extends JPanel {
             }
         });
 
-        bookTable.getSelectionModel().addListSelectionListener(event -> {
-            if (event.getValueIsAdjusting()) {
+        Runnable refreshSelectedBooks = () -> {
+            selectedBookModel.setRowCount(0);
+            for (Map.Entry<String, String> entry : selectedBooks.entrySet()) {
+                selectedBookModel.addRow(new Object[] {entry.getKey(), entry.getValue()});
+            }
+            selectedIsbnsField.setText(String.join(",", selectedBooks.keySet()));
+        };
+
+        JButton addBookButton = new JButton("Add Book");
+        addBookButton.addActionListener(e -> {
+            int row = bookTable.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(this, "Please choose a book to add.", "No Selection", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            int[] rows = bookTable.getSelectedRows();
-            List<String> isbns = new ArrayList<>();
-            for (int row : rows) {
-                isbns.add(String.valueOf(bookModel.getValueAt(row, 0)));
+            String isbn = String.valueOf(bookModel.getValueAt(row, 0));
+            String title = String.valueOf(bookModel.getValueAt(row, 1));
+            int available = Integer.parseInt(String.valueOf(bookModel.getValueAt(row, 2)));
+            if (available <= 0) {
+                JOptionPane.showMessageDialog(this, "Selected book is currently unavailable.", "Unavailable", JOptionPane.WARNING_MESSAGE);
+                return;
             }
-            isbnListField.setText(String.join(",", isbns));
+            selectedBooks.putIfAbsent(isbn, title);
+            refreshSelectedBooks.run();
+        });
+
+        JButton removeBookButton = new JButton("Remove Selected");
+        removeBookButton.addActionListener(e -> {
+            int row = selectedBookTable.getSelectedRow();
+            if (row < 0) {
+                return;
+            }
+            String isbn = String.valueOf(selectedBookModel.getValueAt(row, 0));
+            selectedBooks.remove(isbn);
+            refreshSelectedBooks.run();
+        });
+
+        JButton clearBooksButton = new JButton("Clear");
+        clearBooksButton.addActionListener(e -> {
+            selectedBooks.clear();
+            refreshSelectedBooks.run();
         });
 
         JPanel formPanel = new JPanel(new GridLayout(0, 2, 6, 6));
@@ -149,7 +193,7 @@ public class BorrowPanel extends JPanel {
         formPanel.add(new JLabel("Due Date (yyyy-MM-dd):"));
         formPanel.add(dueDateField);
         formPanel.add(new JLabel("Selected ISBNs:"));
-        formPanel.add(isbnListField);
+        formPanel.add(selectedIsbnsField);
 
         JTextField readerSearchField = new JTextField(12);
         JButton readerSearchButton = new JButton("Find by Name");
@@ -183,9 +227,19 @@ public class BorrowPanel extends JPanel {
         bookPanel.add(bookSearchPanel, BorderLayout.NORTH);
         bookPanel.add(new JScrollPane(bookTable), BorderLayout.CENTER);
 
-        JPanel selectionPanel = new JPanel(new GridLayout(1, 2, 8, 8));
+        JPanel selectedBooksButtonPanel = new JPanel();
+        selectedBooksButtonPanel.add(addBookButton);
+        selectedBooksButtonPanel.add(removeBookButton);
+        selectedBooksButtonPanel.add(clearBooksButton);
+        JPanel selectedBooksPanel = new JPanel(new BorderLayout());
+        selectedBooksPanel.add(new JLabel("Books in this slip"), BorderLayout.NORTH);
+        selectedBooksPanel.add(new JScrollPane(selectedBookTable), BorderLayout.CENTER);
+        selectedBooksPanel.add(selectedBooksButtonPanel, BorderLayout.SOUTH);
+
+        JPanel selectionPanel = new JPanel(new GridLayout(1, 3, 8, 8));
         selectionPanel.add(readerPanel);
         selectionPanel.add(bookPanel);
+        selectionPanel.add(selectedBooksPanel);
 
         JPanel panel = new JPanel(new BorderLayout(0, 8));
         panel.add(formPanel, BorderLayout.NORTH);
@@ -200,10 +254,7 @@ public class BorrowPanel extends JPanel {
         String readerId = readerIdField.getText().trim();
         String borrowDateText = borrowDateField.getText().trim();
         String dueDateText = dueDateField.getText().trim();
-        List<String> isbnList = new ArrayList<>();
-        for (int row : bookTable.getSelectedRows()) {
-            isbnList.add(String.valueOf(bookModel.getValueAt(row, 0)));
-        }
+        List<String> isbnList = new ArrayList<>(selectedBooks.keySet());
 
         if (readerId.isBlank()) {
             JOptionPane.showMessageDialog(this, "Please select a reader.", "Validation Error", JOptionPane.ERROR_MESSAGE);
@@ -293,9 +344,11 @@ public class BorrowPanel extends JPanel {
     }
 
     private String resolveBookTitles(List<String> isbns) {
-        return bookService.searchByIsbn(isbns.getFirst()).stream()
-                .map(Book::getTitle)
-                .reduce((a, b) -> a + ", " + b)
-                .orElse("");
+        if (isbns == null || isbns.isEmpty()) {
+            return "";
+        }
+        return isbns.stream()
+                .map(isbn -> bookService.getBookDAO().findByIsbn(isbn).map(Book::getTitle).orElse(isbn))
+                .collect(Collectors.joining(", "));
     }
 }
