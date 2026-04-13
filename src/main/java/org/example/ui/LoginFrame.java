@@ -80,7 +80,7 @@ public class LoginFrame extends JFrame {
     private JButton buildRegisterButton() {
         JButton registerButton = new JButton("Register");
         registerButton.addActionListener(e -> {
-            RegisterFrame registerFrame = new RegisterFrame();
+            RegisterFrame registerFrame = new RegisterFrame(librarianService);
             registerFrame.setVisible(true);
             dispose();
         });
@@ -91,7 +91,7 @@ public class LoginFrame extends JFrame {
         String username = usernameField.getText();
         String password = new String(passwordField.getPassword());
         if (librarianService.authenticate(username, password)) {
-            MainFrame mainFrame = new MainFrame();
+            MainFrame mainFrame = new MainFrame(librarianService);
             mainFrame.setVisible(true);
             dispose();
         } else {
