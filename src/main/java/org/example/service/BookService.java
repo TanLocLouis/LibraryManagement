@@ -87,6 +87,7 @@ public class BookService {
         return bookDAO.findByIsbn(isbn.trim()).map(List::of).orElse(List.of());
     }
 
+    // Utils functions
     public int countBooks() {
         return bookDAO.countBooks();
     }

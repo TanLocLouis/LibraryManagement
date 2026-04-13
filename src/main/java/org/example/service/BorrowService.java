@@ -167,6 +167,7 @@ public class BorrowService {
         return counts;
     }
 
+    // Utils functions
     public int countBorrowSlips() {
         return borrowDAO.countBorrowSlips();
     }

@@ -97,6 +97,7 @@ public class ReaderService {
         return readerDAO.findByIDCardNumber(idCardNumber);
     }
 
+    // Utils functions
     public int countReaders() {
         return readerDAO.getReaders().size();
     }

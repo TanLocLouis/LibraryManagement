@@ -101,6 +101,7 @@ public class BorrowDAO {
         borrowSlips.add(borrowSlip);
     }
 
+    // Utils functions
     public int countBorrowSlips() {
         return borrowSlips.size();
     }

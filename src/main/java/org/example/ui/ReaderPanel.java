@@ -74,8 +74,8 @@ public class ReaderPanel extends JPanel {
 
         setLayout(new BorderLayout());
         add(contentPanel, BorderLayout.NORTH);
-        add(searchPanel, BorderLayout.CENTER);
-        add(scrollPane, BorderLayout.SOUTH);
+        add(searchPanel, BorderLayout.SOUTH);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     private void loadReadersToTable() {
@@ -104,6 +104,7 @@ public class ReaderPanel extends JPanel {
         JTextField genderField = new JTextField();
         JTextField emailField = new JTextField();
         JTextField addressField = new JTextField();
+
         // Membership createDate is set to today
         // Expire date is today + 48 months
         // Reader ID is generated as UUID

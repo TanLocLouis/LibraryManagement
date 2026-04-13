@@ -129,6 +129,7 @@ public class BookDAO {
         return false;
     }
 
+    // Utils functions
     public int countBooks() {
         return books.size();
     }

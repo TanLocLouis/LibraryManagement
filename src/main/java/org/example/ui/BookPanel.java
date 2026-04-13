@@ -70,8 +70,8 @@ public class BookPanel extends JPanel {
 
         setLayout(new BorderLayout());
         add(contentPanel, BorderLayout.NORTH);
-        add(searchPanel, BorderLayout.CENTER);
-        add(scrollPane, BorderLayout.SOUTH);
+        add(searchPanel, BorderLayout.SOUTH);
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     public void showAddBookDialog() {
