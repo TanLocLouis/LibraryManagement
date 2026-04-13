@@ -3,10 +3,7 @@ package org.example.service;
 import org.example.dao.ReaderDAO;
 import org.example.model.Reader;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ReaderService {
@@ -83,6 +80,13 @@ public class ReaderService {
         }
 
         return updated;
+    }
+
+    public Optional<Reader> findReaderById(String readerId) {
+        if (readerId == null || readerId.isBlank()) {
+            throw new IllegalArgumentException("Reader ID cannot be blank");
+        }
+        return readerDAO.findById(readerId);
     }
 
     public List<Reader> findReadersByName(String name) {

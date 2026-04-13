@@ -54,7 +54,7 @@ public class BorrowPanel extends JPanel {
         showAllButton.addActionListener(e -> loadBorrowSlipsToTable(borrowService.getAllBorrowSlips()));
         topPanel.add(showAllButton);
 
-        String[] columns = {"Slip ID", "Reader ID", "Borrow Date", "Due Date", "Return Date", "ISBN List"};
+        String[] columns = {"Slip ID", "Reader ID", "Reader Name", "Book Titles", "Borrow Date", "Due Date", "Return Date", "ISBN List"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -73,13 +73,17 @@ public class BorrowPanel extends JPanel {
         tableModel.setRowCount(0);
         for (BorrowSlip slip : slips) {
             String isbnList = slip.getIsbnList() == null ? "" : String.join(",", slip.getIsbnList());
+            String readerName = resolveReaderName(slip.getReaderId());
+            String bookTitles = resolveBookTitles(slip.getIsbnList());
             tableModel.addRow(new Object[] {
                     slip.getSlipId(),
                     slip.getReaderId(),
+                    readerName,
+                    bookTitles,
                     slip.getBorrowDate(),
                     slip.getDueDate(),
                     slip.getReturnDate(),
-                    isbnList
+                    isbnList,
             });
         }
     }
@@ -280,5 +284,18 @@ public class BorrowPanel extends JPanel {
                     book.getAvailableCopies()
             });
         }
+    }
+
+    private String resolveReaderName(String readerId) {
+        return readerService.findReaderById(readerId)
+                .map(Reader::getFullName)
+                .orElse("");
+    }
+
+    private String resolveBookTitles(List<String> isbns) {
+        return bookService.searchByIsbn(isbns.getFirst()).stream()
+                .map(Book::getTitle)
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
     }
 }
