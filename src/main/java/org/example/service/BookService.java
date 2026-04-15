@@ -43,6 +43,10 @@ public class BookService {
     }
 
     //
+    public List<Book> getBooks() {
+        return bookDAO.getBooks();
+    }
+
     public void addBook(Book book) {
         if (validate(book)) {
             bookDAO.addBook(book);

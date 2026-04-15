@@ -27,13 +27,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BorrowPanel extends JPanel {
-    private final BorrowService borrowService = new BorrowService();
-    private final ReaderService readerService = new ReaderService();
-    private final BookService bookService = new BookService();
+    private final ReaderService readerService;
+    private final BookService bookService;
+    private final BorrowService borrowService;
     private DefaultTableModel tableModel;
     private JTable borrowTable;
 
     public BorrowPanel() {
+        this(new ReaderService(), new BookService(), new BorrowService());
+        initialize();
+    }
+
+    public BorrowPanel(ReaderService readerService, BookService bookService, BorrowService borrowService) {
+        this.readerService = readerService;
+        this.bookService = bookService;
+        this.borrowService = borrowService;
+
         initialize();
     }
 
@@ -108,7 +117,7 @@ public class BorrowPanel extends JPanel {
         };
         JTable readerTable = new JTable(readerModel);
         readerTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        loadReadersToTable(readerModel, readerService.getReaderDAO().getReaders());
+        loadReadersToTable(readerModel, readerService.getReaders());
 
         DefaultTableModel bookModel = new DefaultTableModel(new String[] {"ISBN", "Title", "Available"}, 0) {
             @Override
@@ -118,7 +127,7 @@ public class BorrowPanel extends JPanel {
         };
         JTable bookTable = new JTable(bookModel);
         bookTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        loadBooksToTable(bookModel, bookService.getBookDAO().getBooks());
+        loadBooksToTable(bookModel, bookService.getBooks());
 
         DefaultTableModel selectedBookModel = new DefaultTableModel(new String[] {"ISBN", "Title"}, 0) {
             @Override
@@ -201,7 +210,7 @@ public class BorrowPanel extends JPanel {
                 loadReadersToTable(readerModel, readerService.findReadersByName(readerSearchField.getText())));
         JButton readerShowAllButton = new JButton("Show All");
         readerShowAllButton.addActionListener(e ->
-                loadReadersToTable(readerModel, readerService.getReaderDAO().getReaders()));
+                loadReadersToTable(readerModel, readerService.getReaders()));
         JPanel readerSearchPanel = new JPanel();
         readerSearchPanel.add(new JLabel("Reader Name:"));
         readerSearchPanel.add(readerSearchField);

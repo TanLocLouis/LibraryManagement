@@ -45,6 +45,10 @@ public class ReaderService {
     }
 
     //
+    public ArrayList<Reader> getReaders() {
+        return readerDAO.getReaders();
+    }
+
     public void addReader(Reader reader) {
         if (validate(reader)) {
             readerDAO.addReader(reader);

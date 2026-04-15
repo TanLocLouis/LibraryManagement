@@ -13,11 +13,17 @@ import java.util.List;
 import java.util.UUID;
 
 public class ReaderPanel extends JPanel {
-    private final ReaderService readerService = new ReaderService();
+    private final ReaderService readerService;
     private DefaultTableModel tableModel;
     private JTable readerTable;
 
     public ReaderPanel() {
+        this(new ReaderService());
+        initialize();
+    }
+
+    public ReaderPanel(ReaderService readerService) {
+        this.readerService = readerService;
         initialize();
     }
 

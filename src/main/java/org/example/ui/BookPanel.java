@@ -11,11 +11,17 @@ import static java.lang.Integer.parseInt;
 
 
 public class BookPanel extends JPanel {
-    private final BookService bookService = new BookService();
+    private final BookService bookService;
     private DefaultTableModel tableModel;
     private JTable bookTable;
 
     public BookPanel() {
+        this(new BookService());
+        initialize();
+    }
+
+    public BookPanel(BookService bookService) {
+        this.bookService = bookService;
         initialize();
     }
 
