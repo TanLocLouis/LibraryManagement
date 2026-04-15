@@ -1,6 +1,7 @@
 package org.example.dao;
 
 import org.example.model.Reader;
+import org.example.util.CsvUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,7 +14,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class ReaderDAO {
-    private static final Path FILE_PATH = Paths.get("data", "readers.txt");
+    private static final Path FILE_PATH = Paths.get("data", "readers.csv");
+    private static final Path LEGACY_FILE_PATH = Paths.get("data", "readers.txt");
     private final ArrayList<Reader> readers = new ArrayList<>();
 
     public ReaderDAO() {
@@ -23,10 +25,46 @@ public class ReaderDAO {
     // Load and Save
     public void loadReaders() {
         readers.clear();
-        if (!Files.exists(FILE_PATH)) {
+        if (Files.exists(FILE_PATH)) {
+            loadFromCsv(FILE_PATH);
             return;
         }
-        try (BufferedReader reader = Files.newBufferedReader(FILE_PATH)) {
+        if (Files.exists(LEGACY_FILE_PATH)) {
+            loadFromLegacyTxt(LEGACY_FILE_PATH);
+            saveReaders();
+        }
+    }
+
+    private void loadFromCsv(Path path) {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) {
+                    continue;
+                }
+                List<String> parts = CsvUtil.parseRow(line);
+                if (parts.size() < 9) {
+                    continue;
+                }
+                readers.add(new Reader(
+                        parts.get(0),
+                        parts.get(1),
+                        parts.get(2),
+                        parts.get(3),
+                        parts.get(4),
+                        parts.get(5),
+                        parts.get(6),
+                        parts.get(7),
+                        parts.get(8)
+                ));
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to load readers", e);
+        }
+    }
+
+    private void loadFromLegacyTxt(Path path) {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.isBlank()) {
@@ -61,7 +99,7 @@ public class ReaderDAO {
             }
             try (BufferedWriter writer = Files.newBufferedWriter(FILE_PATH)) {
                 for (Reader reader : readers) {
-                    writer.write(String.join("|",
+                    writer.write(CsvUtil.formatRow(List.of(
                             safe(reader.getReaderId()),
                             safe(reader.getFullName()),
                             safe(reader.getDateOfBirth()),
@@ -70,7 +108,7 @@ public class ReaderDAO {
                             safe(reader.getEmail()),
                             safe(reader.getAddress()),
                             safe(reader.getCreateDate()),
-                            safe(reader.getExpireDate())));
+                            safe(reader.getExpireDate()))));
                     writer.newLine();
                 }
             }

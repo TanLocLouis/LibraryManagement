@@ -1,6 +1,7 @@
 package org.example.dao;
 
 import org.example.model.Librarian;
+import org.example.util.CsvUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,10 +10,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class LibrarianDAO {
-    private static final Path FILE_PATH = Paths.get("data", "accounts.txt");
+    private static final Path FILE_PATH = Paths.get("data", "accounts.csv");
+    private static final Path LEGACY_FILE_PATH = Paths.get("data", "accounts.txt");
     private final ArrayList<Librarian> librarians = new ArrayList<>();
 
     public LibrarianDAO() {
@@ -32,10 +35,37 @@ public class LibrarianDAO {
     // Load and Save
     public void loadLibrarians() {
         librarians.clear();
-        if (!Files.exists(FILE_PATH)) {
+        if (Files.exists(FILE_PATH)) {
+            loadFromCsv(FILE_PATH);
             return;
         }
-        try (BufferedReader reader = Files.newBufferedReader(FILE_PATH)) {
+
+        if (Files.exists(LEGACY_FILE_PATH)) {
+            loadFromLegacyTxt(LEGACY_FILE_PATH);
+            saveLibrarians();
+        }
+    }
+
+    private void loadFromCsv(Path path) {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) {
+                    continue;
+                }
+                List<String> parts = CsvUtil.parseRow(line);
+                if (parts.size() < 2) {
+                    continue;
+                }
+                librarians.add(new Librarian(parts.get(0), parts.get(1)));
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to load librarians", e);
+        }
+    }
+
+    private void loadFromLegacyTxt(Path path) {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.isBlank()) {
@@ -60,9 +90,9 @@ public class LibrarianDAO {
             }
             try (BufferedWriter writer = Files.newBufferedWriter(FILE_PATH)) {
                 for (Librarian librarian : librarians) {
-                    writer.write(String.join("|",
+                    writer.write(CsvUtil.formatRow(List.of(
                             safe(librarian.getUsername()),
-                            safe(librarian.getPassword())));
+                            safe(librarian.getPassword()))));
                     writer.newLine();
                 }
             }

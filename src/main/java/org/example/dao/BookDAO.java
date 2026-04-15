@@ -1,6 +1,7 @@
 package org.example.dao;
 
 import org.example.model.Book;
+import org.example.util.CsvUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,10 +10,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class BookDAO {
-    private static final Path FILE_PATH = Paths.get("data", "books.txt");
+    private static final Path FILE_PATH = Paths.get("data", "books.csv");
+    private static final Path LEGACY_FILE_PATH = Paths.get("data", "books.txt");
     private final ArrayList<Book> books = new ArrayList<>();
 
     public BookDAO() {
@@ -22,10 +25,45 @@ public class BookDAO {
     // Load and Save
     public void loadBooks() {
         books.clear();
-        if (!Files.exists(FILE_PATH)) {
+        if (Files.exists(FILE_PATH)) {
+            loadFromCsv(FILE_PATH);
             return;
         }
-        try (BufferedReader reader = Files.newBufferedReader(FILE_PATH)) {
+        if (Files.exists(LEGACY_FILE_PATH)) {
+            loadFromLegacyTxt(LEGACY_FILE_PATH);
+            saveBooks();
+        }
+    }
+
+    private void loadFromCsv(Path path) {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) {
+                    continue;
+                }
+                List<String> parts = CsvUtil.parseRow(line);
+                if (parts.size() < 8) {
+                    continue;
+                }
+                books.add(new Book(
+                        parts.get(0),
+                        parts.get(1),
+                        parts.get(2),
+                        parts.get(3),
+                        parts.get(4),
+                        parseInt(parts.get(5)),
+                        parseInt(parts.get(6)),
+                        parseInt(parts.get(7))
+                ));
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to load books", e);
+        }
+    }
+
+    private void loadFromLegacyTxt(Path path) {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.isBlank()) {
@@ -59,7 +97,7 @@ public class BookDAO {
             }
             try (BufferedWriter writer = Files.newBufferedWriter(FILE_PATH)) {
                 for (Book book : books) {
-                    writer.write(String.join("|",
+                    writer.write(CsvUtil.formatRow(List.of(
                             safe(book.getIsbn()),
                             safe(book.getTitle()),
                             safe(book.getAuthor()),
@@ -67,7 +105,7 @@ public class BookDAO {
                             safe(book.getPublisher()),
                             Integer.toString(book.getPublishYear()),
                             Integer.toString(book.getTotalCopies()),
-                            Integer.toString(book.getAvailableCopies())));
+                            Integer.toString(book.getAvailableCopies()))));
                     writer.newLine();
                 }
             }

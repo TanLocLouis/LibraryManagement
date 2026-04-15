@@ -1,6 +1,7 @@
 package org.example.dao;
 
 import org.example.model.BorrowSlip;
+import org.example.util.CsvUtil;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -16,7 +17,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class BorrowDAO {
-    private static final Path FILE_PATH = Paths.get("data", "borrows.txt");
+    private static final Path FILE_PATH = Paths.get("data", "borrows.csv");
+    private static final Path LEGACY_FILE_PATH = Paths.get("data", "borrows.txt");
     private final ArrayList<BorrowSlip> borrowSlips = new ArrayList<>();
 
     public BorrowDAO() {
@@ -26,10 +28,49 @@ public class BorrowDAO {
     // Load and save
     public void loadBorrowSlips() {
         borrowSlips.clear();
-        if (!Files.exists(FILE_PATH)) {
+        if (Files.exists(FILE_PATH)) {
+            loadFromCsv(FILE_PATH);
             return;
         }
-        try (BufferedReader reader = Files.newBufferedReader(FILE_PATH)) {
+        if (Files.exists(LEGACY_FILE_PATH)) {
+            loadFromLegacyTxt(LEGACY_FILE_PATH);
+            saveBorrowSlips();
+        }
+    }
+
+    private void loadFromCsv(Path path) {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) {
+                    continue;
+                }
+                List<String> parts = CsvUtil.parseRow(line);
+                if (parts.size() < 6) {
+                    continue;
+                }
+                List<String> isbnList = parts.get(5).isBlank()
+                        ? Collections.emptyList()
+                        : Arrays.stream(parts.get(5).split(";"))
+                        .map(String::trim)
+                        .filter(value -> !value.isEmpty())
+                        .collect(Collectors.toList());
+                borrowSlips.add(new BorrowSlip(
+                        parts.get(0),
+                        parts.get(1),
+                        parts.get(2),
+                        parts.get(3),
+                        parts.get(4),
+                        isbnList
+                ));
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to load borrow slips", e);
+        }
+    }
+
+    private void loadFromLegacyTxt(Path path) {
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.isBlank()) {
@@ -67,13 +108,13 @@ public class BorrowDAO {
             }
             try (BufferedWriter writer = Files.newBufferedWriter(FILE_PATH)) {
                 for (BorrowSlip borrowSlip : borrowSlips) {
-                    writer.write(String.join("|",
+                    writer.write(CsvUtil.formatRow(List.of(
                             safe(borrowSlip.getSlipId()),
                             safe(borrowSlip.getReaderId()),
                             safe(borrowSlip.getBorrowDate()),
                             safe(borrowSlip.getDueDate()),
                             safe(borrowSlip.getReturnDate()),
-                            String.join(",", borrowSlip.getIsbnList() == null ? List.of() : borrowSlip.getIsbnList())));
+                            String.join(";", borrowSlip.getIsbnList() == null ? List.of() : borrowSlip.getIsbnList()))));
                     writer.newLine();
                 }
             }
