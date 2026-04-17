@@ -82,6 +82,14 @@ public class Book {
         this.price = totalCopies;
     }
 
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
     public int getAvailableCopies() {
         return availableCopies;
     }

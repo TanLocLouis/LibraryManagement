@@ -55,13 +55,20 @@ public class BorrowDAO {
                         .map(String::trim)
                         .filter(value -> !value.isEmpty())
                         .collect(Collectors.toList());
+                List<String> lostIsbnList = parts.size() >= 7 && !parts.get(6).isBlank()
+                        ? Arrays.stream(parts.get(6).split(";"))
+                        .map(String::trim)
+                        .filter(value -> !value.isEmpty())
+                        .collect(Collectors.toList())
+                        : Collections.emptyList();
                 borrowSlips.add(new BorrowSlip(
                         parts.get(0),
                         parts.get(1),
                         parts.get(2),
                         parts.get(3),
                         parts.get(4),
-                        isbnList
+                        isbnList,
+                        lostIsbnList
                 ));
             }
         } catch (IOException e) {
@@ -86,13 +93,20 @@ public class BorrowDAO {
                         .map(String::trim)
                         .filter(value -> !value.isEmpty())
                         .collect(Collectors.toList());
+                List<String> lostIsbnList = parts.length >= 7 && !parts[6].isBlank()
+                        ? Arrays.stream(parts[6].split(","))
+                        .map(String::trim)
+                        .filter(value -> !value.isEmpty())
+                        .collect(Collectors.toList())
+                        : Collections.emptyList();
                 borrowSlips.add(new BorrowSlip(
                         parts[0],
                         parts[1],
                         parts[2],
                         parts[3],
                         parts[4],
-                        isbnList
+                        isbnList,
+                        lostIsbnList
                 ));
             }
         } catch (IOException e) {
@@ -114,7 +128,8 @@ public class BorrowDAO {
                             safe(borrowSlip.getBorrowDate()),
                             safe(borrowSlip.getDueDate()),
                             safe(borrowSlip.getReturnDate()),
-                            String.join(";", borrowSlip.getIsbnList() == null ? List.of() : borrowSlip.getIsbnList()))));
+                            String.join(";", borrowSlip.getIsbnList() == null ? List.of() : borrowSlip.getIsbnList()),
+                            String.join(";", borrowSlip.getLostIsbnList() == null ? List.of() : borrowSlip.getLostIsbnList()))));
                     writer.newLine();
                 }
             }

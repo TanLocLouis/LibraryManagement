@@ -11,18 +11,25 @@ public class BorrowSlip {
     private String dueDate;
     private String returnDate;
     private List<String> isbnList;
+    private List<String> lostIsbnList;
 
     public BorrowSlip() {
         this.isbnList = new ArrayList<>();
+        this.lostIsbnList = new ArrayList<>();
     }
 
     public BorrowSlip(String slipId, String readerId, String borrowDate, String dueDate, String returnDate, List<String> isbnList) {
+        this(slipId, readerId, borrowDate, dueDate, returnDate, isbnList, List.of());
+    }
+
+    public BorrowSlip(String slipId, String readerId, String borrowDate, String dueDate, String returnDate, List<String> isbnList, List<String> lostIsbnList) {
         this.slipId = slipId;
         this.readerId = readerId;
         this.borrowDate = borrowDate;
         this.dueDate = dueDate;
         this.returnDate = returnDate;
         this.isbnList = isbnList == null ? new ArrayList<>() : new ArrayList<>(isbnList);
+        this.lostIsbnList = lostIsbnList == null ? new ArrayList<>() : new ArrayList<>(lostIsbnList);
     }
 
     public String getSlipId() {
@@ -71,6 +78,14 @@ public class BorrowSlip {
 
     public void setIsbnList(List<String> isbnList) {
         this.isbnList = isbnList == null ? new ArrayList<>() : new ArrayList<>(isbnList);
+    }
+
+    public List<String> getLostIsbnList() {
+        return lostIsbnList;
+    }
+
+    public void setLostIsbnList(List<String> lostIsbnList) {
+        this.lostIsbnList = lostIsbnList == null ? new ArrayList<>() : new ArrayList<>(lostIsbnList);
     }
 }
 

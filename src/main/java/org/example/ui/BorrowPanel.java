@@ -6,8 +6,10 @@ import org.example.model.Reader;
 import org.example.service.BookService;
 import org.example.service.BorrowService;
 import org.example.service.ReaderService;
+import org.example.util.PdfExportUtil;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
 import javax.swing.JOptionPane;
@@ -18,12 +20,15 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
 public class BorrowPanel extends JPanel {
@@ -66,6 +71,14 @@ public class BorrowPanel extends JPanel {
         showAllButton.addActionListener(e -> loadBorrowSlipsToTable(borrowService.getAllBorrowSlips()));
         topPanel.add(showAllButton);
 
+        JButton exportBorrowButton = new JButton("Export Borrow PDF");
+        exportBorrowButton.addActionListener(e -> exportBorrowSlipPdf());
+        topPanel.add(exportBorrowButton);
+
+        JButton exportReturnButton = new JButton("Export Return PDF");
+        exportReturnButton.addActionListener(e -> exportReturnSlipPdf());
+        topPanel.add(exportReturnButton);
+
         String[] columns = {"Slip ID", "Reader ID", "Reader Name", "Book Titles", "Borrow Date", "Due Date", "Return Date", "ISBN List"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
@@ -105,7 +118,7 @@ public class BorrowPanel extends JPanel {
         JTextField readerIdField = new JTextField(15);
         readerIdField.setEditable(false);
         JTextField borrowDateField = new JTextField(LocalDate.now().toString(), 15);
-        JTextField dueDateField = new JTextField(LocalDate.now().plusDays(14).toString(), 15);
+        JTextField dueDateField = new JTextField(LocalDate.now().plusDays(BorrowService.MAX_BORROW_DAYS).toString(), 15);
         JTextField selectedIsbnsField = new JTextField(20);
         selectedIsbnsField.setEditable(false);
 
@@ -293,10 +306,13 @@ public class BorrowPanel extends JPanel {
         }
         String slipId = String.valueOf(tableModel.getValueAt(selectedRow, 0));
         JTextField returnDateField = new JTextField(LocalDate.now().toString(), 15);
+        JTextField lostIsbnField = new JTextField(25);
         JPanel panel = new JPanel();
         panel.setLayout(new javax.swing.BoxLayout(panel, javax.swing.BoxLayout.Y_AXIS));
         panel.add(new JLabel("Return Date (yyyy-MM-dd):"));
         panel.add(returnDateField);
+        panel.add(new JLabel("Lost ISBNs (comma/semicolon separated, optional):"));
+        panel.add(lostIsbnField);
 
         int result = JOptionPane.showConfirmDialog(this, panel, "Return Borrow Slip", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result != JOptionPane.OK_OPTION) {
@@ -305,12 +321,125 @@ public class BorrowPanel extends JPanel {
 
         try {
             LocalDate returnDate = parseDateOrDefault(returnDateField.getText().trim(), LocalDate.now());
-            borrowService.returnBorrowSlip(slipId, returnDate);
+            List<String> lostIsbns = parseIsbnInput(lostIsbnField.getText());
+            BorrowSlip returnedSlip = borrowService.returnBorrowSlip(slipId, returnDate, lostIsbns);
+            BorrowService.PenaltyBreakdown penalty = borrowService.calculatePenalty(returnedSlip);
             loadBorrowSlipsToTable(borrowService.getAllBorrowSlips());
-            JOptionPane.showMessageDialog(this, "Borrow slip returned successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            String message = "Borrow slip returned successfully!\n"
+                    + "Overdue fine: " + formatMoney(penalty.overdueFine()) + "\n"
+                    + "Lost-book fine: " + formatMoney(penalty.lostBookFine()) + "\n"
+                    + "Total fine: " + formatMoney(penalty.totalFine());
+            JOptionPane.showMessageDialog(this, message, "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Validation Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void exportBorrowSlipPdf() {
+        Optional<BorrowSlip> selectedSlip = getSelectedBorrowSlip();
+        if (selectedSlip.isEmpty()) {
+            return;
+        }
+        BorrowSlip slip = selectedSlip.get();
+        Path outputPath = choosePdfPath("Save Borrow Slip PDF", "borrow-" + safeFileToken(slip.getSlipId()) + ".pdf");
+        if (outputPath == null) {
+            return;
+        }
+        String readerName = resolveReaderName(slip.getReaderId());
+        List<Book> books = collectBooksFromIsbns(slip.getIsbnList());
+        try {
+            PdfExportUtil.exportBorrowSlip(outputPath, slip, readerName, books);
+            JOptionPane.showMessageDialog(this, "Borrow slip exported to: " + outputPath, "Export Success", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IllegalStateException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void exportReturnSlipPdf() {
+        Optional<BorrowSlip> selectedSlip = getSelectedBorrowSlip();
+        if (selectedSlip.isEmpty()) {
+            return;
+        }
+        BorrowSlip slip = selectedSlip.get();
+        if (slip.getReturnDate() == null || slip.getReturnDate().isBlank()) {
+            JOptionPane.showMessageDialog(this, "Please return this slip before exporting return PDF.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        Path outputPath = choosePdfPath("Save Return Slip PDF", "return-" + safeFileToken(slip.getSlipId()) + ".pdf");
+        if (outputPath == null) {
+            return;
+        }
+        String readerName = resolveReaderName(slip.getReaderId());
+        List<Book> books = collectBooksFromIsbns(slip.getIsbnList());
+        BorrowService.PenaltyBreakdown penalty = borrowService.calculatePenalty(slip);
+        try {
+            PdfExportUtil.exportReturnSlip(outputPath, slip, readerName, books, penalty);
+            JOptionPane.showMessageDialog(this, "Return slip exported to: " + outputPath, "Export Success", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IllegalStateException ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private Optional<BorrowSlip> getSelectedBorrowSlip() {
+        int selectedRow = borrowTable.getSelectedRow();
+        if (selectedRow < 0) {
+            JOptionPane.showMessageDialog(this, "Please select a borrow slip first.", "No Selection", JOptionPane.WARNING_MESSAGE);
+            return Optional.empty();
+        }
+        String slipId = String.valueOf(tableModel.getValueAt(selectedRow, 0));
+        return borrowService.findBorrowSlipById(slipId)
+                .or(() -> {
+                    JOptionPane.showMessageDialog(this, "Borrow slip not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return Optional.empty();
+                });
+    }
+
+    private Path choosePdfPath(String dialogTitle, String defaultFileName) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle(dialogTitle);
+        fileChooser.setSelectedFile(new java.io.File(defaultFileName));
+        int result = fileChooser.showSaveDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) {
+            return null;
+        }
+        java.io.File selectedFile = fileChooser.getSelectedFile();
+        String name = selectedFile.getName().toLowerCase();
+        if (!name.endsWith(".pdf")) {
+            selectedFile = new java.io.File(selectedFile.getParentFile(), selectedFile.getName() + ".pdf");
+        }
+        return selectedFile.toPath();
+    }
+
+    private List<Book> collectBooksFromIsbns(List<String> isbns) {
+        if (isbns == null) {
+            return List.of();
+        }
+        return isbns.stream()
+                .map(isbn -> bookService.getBookDAO().findByIsbn(isbn).orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private List<String> parseIsbnInput(String value) {
+        if (value == null || value.isBlank()) {
+            return List.of();
+        }
+        return Stream.of(value.split("[,;]"))
+                .map(String::trim)
+                .filter(token -> !token.isBlank())
+                .collect(Collectors.toList());
+    }
+
+    private String formatMoney(long amount) {
+        java.text.NumberFormat formatter = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+        return formatter.format(amount) + " VND";
+    }
+
+    private String safeFileToken(String value) {
+        if (value == null || value.isBlank()) {
+            return "slip";
+        }
+        return value.replaceAll("[^A-Za-z0-9_-]", "_");
     }
 
     private LocalDate parseDateOrDefault(String value, LocalDate defaultDate) {
