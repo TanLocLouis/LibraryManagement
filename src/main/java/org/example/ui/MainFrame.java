@@ -13,9 +13,9 @@ import java.awt.BorderLayout;
 
 public class MainFrame extends JFrame {
     private final LibrarianService librarianService;
-    private final ReaderService readerService = new ReaderService();
-    private final BookService bookService = new BookService() ;
-    private final BorrowService borrowService = new BorrowService();
+    private final ReaderService readerService;
+    private final BookService bookService;
+    private final BorrowService borrowService;
 
 
     public MainFrame() {
@@ -25,6 +25,9 @@ public class MainFrame extends JFrame {
     public MainFrame(LibrarianService librarianService) {
         super("Library Management");
         this.librarianService = librarianService;
+        this.readerService = new ReaderService();
+        this.bookService = new BookService();
+        this.borrowService = new BorrowService(bookService, readerService);
         initialize();
     }
 
@@ -45,7 +48,7 @@ public class MainFrame extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
         add(tabbedPane, BorderLayout.CENTER);
-        setSize(900, 600);
+        setSize(1200, 750);
         setLocationRelativeTo(null);
     }
 

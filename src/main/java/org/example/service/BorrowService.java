@@ -35,6 +35,10 @@ public class BorrowService {
         this(borrowDAO, new BookService(), new ReaderService());
     }
 
+    public BorrowService(BookService bookService, ReaderService readerService) {
+        this(new BorrowDAO(), bookService, readerService);
+    }
+
     public BorrowService(BorrowDAO borrowDAO, BookService bookService, ReaderService readerService) {
         this.borrowDAO = borrowDAO;
         this.bookService = bookService;

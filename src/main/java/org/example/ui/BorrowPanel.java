@@ -94,6 +94,7 @@ public class BorrowPanel extends JPanel {
         add(new JScrollPane(borrowTable), BorderLayout.CENTER);
     }
 
+    // Load BorrowSlips
     private void loadBorrowSlipsToTable(List<BorrowSlip> slips) {
         tableModel.setRowCount(0);
         for (BorrowSlip slip : slips) {
@@ -113,6 +114,7 @@ public class BorrowPanel extends JPanel {
         }
     }
 
+    // Show dialog to create borrow slip
     private void showCreateBorrowSlipDialog() {
         JTextField slipIdField = new JTextField(15);
         JTextField readerIdField = new JTextField(15);
@@ -122,6 +124,7 @@ public class BorrowPanel extends JPanel {
         JTextField selectedIsbnsField = new JTextField(20);
         selectedIsbnsField.setEditable(false);
 
+        // Show Readers
         DefaultTableModel readerModel = new DefaultTableModel(new String[] {"Reader ID", "Full Name", "ID Card"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -132,6 +135,7 @@ public class BorrowPanel extends JPanel {
         readerTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         loadReadersToTable(readerModel, readerService.getReaders());
 
+        // Show Books
         DefaultTableModel bookModel = new DefaultTableModel(new String[] {"ISBN", "Title", "Available"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -205,6 +209,7 @@ public class BorrowPanel extends JPanel {
             refreshSelectedBooks.run();
         });
 
+        // Main form layout
         JPanel formPanel = new JPanel(new GridLayout(0, 2, 6, 6));
         formPanel.add(new JLabel("Slip ID (optional):"));
         formPanel.add(slipIdField);
@@ -217,6 +222,7 @@ public class BorrowPanel extends JPanel {
         formPanel.add(new JLabel("Selected ISBNs:"));
         formPanel.add(selectedIsbnsField);
 
+        // Reader search panel
         JTextField readerSearchField = new JTextField(12);
         JButton readerSearchButton = new JButton("Find by Name");
         readerSearchButton.addActionListener(e ->
@@ -233,6 +239,7 @@ public class BorrowPanel extends JPanel {
         readerPanel.add(readerSearchPanel, BorderLayout.NORTH);
         readerPanel.add(new JScrollPane(readerTable), BorderLayout.CENTER);
 
+        // Book search panel
         JTextField bookSearchField = new JTextField(12);
         JButton bookSearchButton = new JButton("Find by Name");
         bookSearchButton.addActionListener(e ->
@@ -249,6 +256,7 @@ public class BorrowPanel extends JPanel {
         bookPanel.add(bookSearchPanel, BorderLayout.NORTH);
         bookPanel.add(new JScrollPane(bookTable), BorderLayout.CENTER);
 
+        // Selected books panel
         JPanel selectedBooksButtonPanel = new JPanel();
         selectedBooksButtonPanel.add(addBookButton);
         selectedBooksButtonPanel.add(removeBookButton);
@@ -267,6 +275,7 @@ public class BorrowPanel extends JPanel {
         panel.add(formPanel, BorderLayout.NORTH);
         panel.add(selectionPanel, BorderLayout.CENTER);
 
+        // Show dialog and handle result
         int result = JOptionPane.showConfirmDialog(this, panel, "Create Borrow Slip", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (result != JOptionPane.OK_OPTION) {
             return;
@@ -335,6 +344,7 @@ public class BorrowPanel extends JPanel {
         }
     }
 
+    // Export PDF methods
     private void exportBorrowSlipPdf() {
         Optional<BorrowSlip> selectedSlip = getSelectedBorrowSlip();
         if (selectedSlip.isEmpty()) {
@@ -394,6 +404,7 @@ public class BorrowPanel extends JPanel {
                 });
     }
 
+    // Some helper methods for PDF export and data handling
     private Path choosePdfPath(String dialogTitle, String defaultFileName) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle(dialogTitle);
